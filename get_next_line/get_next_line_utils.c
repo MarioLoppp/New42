@@ -45,3 +45,9 @@ char	*ft_strchr(char *s, int c)
 		return (s);
 	return (NULL);
 }
+
+void	free_temp(char	**temp)
+{
+	free(*temp);
+	*temp = NULL;
+}

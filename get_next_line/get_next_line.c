@@ -12,9 +12,9 @@
 
 #include "get_next_line.h"
 
-int	ft_strlen(char *str)
+size_t	ft_strlen(char *str)
 {
-	int	i;
+	size_t	i;
 
 	i = 0;
 	while (str[i])
@@ -25,7 +25,7 @@ int	ft_strlen(char *str)
 char	*ft_strdup(char *str)
 {
 	char	*dup;
-	int		i;
+	size_t	i;
 
 	dup = malloc(sizeof(char) * (ft_strlen(str) + 1));
 	if (!dup)
@@ -43,8 +43,8 @@ char	*ft_strdup(char *str)
 char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*append;
-	int		i;
-	int		j;
+	size_t	i;
+	size_t	j;
 
 	if (!s1 || !s2)
 		return (NULL);
@@ -60,7 +60,7 @@ char	*ft_strjoin(char *s1, char *s2)
 	}
 	while (s2[j])
 	{
-		append[i + j] = s2[j]
+		append[i + j] = s2[j];
 		j++;
 	}
 	append[i + j] = '\0';
@@ -74,15 +74,32 @@ char	*extract_line(char **temp)
 	char	*newline_pointer;
 
 	newline_pointer = ft_strchr(*temp, '\n');
-	*temp = new_temp;
+	if (newline_pointer)
+	{
+		line = ft_substr(*temp, 0, newline_pointer - *temp + 1);
+		if (!line)
+			return (free_temp(temp), NULL);
+		new_temp = ft_strdup(newline_pointer + 1);
+		if (!new_temp)
+			return (free(line), free_temp(temp), NULL);
+		free(*temp);
+		*temp = new_temp;
+	}
+	else
+	{
+		line = ft_strdup(*temp);
+		free_temp(temp);
+		if (!line)
+			return (NULL);
+	}
 	return (line);
 }
 
 char	*get_next_line(int fd)
 {
-	static	char	*temp;
-	char			*buffer;
-	int				bytes;
+	static char	*temp;
+	char		*buffer;
+	int			bytes;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (free(temp), temp = NULL, NULL);
@@ -96,12 +113,12 @@ char	*get_next_line(int fd)
 	{
 		bytes = read(fd, buffer, BUFFER_SIZE);
 		if (bytes == -1)
-			return (NULL);
+			return (free(buffer), free_temp(&temp), NULL);
 		buffer[bytes] = '\0';
 		temp = ft_strjoin(temp, buffer);
 	}
 	free(buffer);
 	if (!temp)
-		return (free(temp), temp = NULL, NULL);
-	return (extract_line(&temp));	
+		return (free_temp(&temp), NULL);
+	return (extract_line(&temp));
 }
