@@ -37,8 +37,7 @@ void	check_width_precision(const char *letter, t_flags *flags, int *count)
 			i++;
 		}
 	}
-	if (ft_strchr("cspdiuxX%", letter[i]))
-		*count += i;
+	*count += i;
 }
 
 void	fill_flags(int c, t_flags *flags)
@@ -92,9 +91,14 @@ void	check_flags(const char *letter, t_flags *flags, int *i)
 int	parse(const char *letter, va_list argument_list, int *i)
 {
 	t_flags	flags;
+	int		start;
 
+	start = *i;
 	init_flags(&flags);
 	check_flags(letter, &flags, i);
+	if (flags.ignore)
+		return (*i = start - 1, 0);
+	apply_priorities(&flags, letter[*i]);
 	if (letter[*i] == 'c')
 		return (char_print(va_arg(argument_list, int), flags));
 	else if (letter[*i] == 's')

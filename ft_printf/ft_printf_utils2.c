@@ -1,26 +1,59 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printf_utils.c                                  :+:      :+:    :+:   */
+/*   ft_printf_utils2.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: marlope3 <marlope3@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/30 20:51:18 by marlope3          #+#    #+#             */
-/*   Updated: 2026/09/30 20:51:18 by marlope3         ###   ########.fr       */
+/*   Created: 2026/10/01 00:50:58 by marlope3          #+#    #+#             */
+/*   Updated: 2026/10/01 00:50:58 by marlope3         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_printf.h"
 
-void	apply_priorities(t_flags *flags, int c)
+int	ch_print(char a)
 {
-	if (flags->left_align)
-		flags->zero = 0;
-	if (flags->plus)
-		flags->space = 0;
-	if (flags->dot && (c == 'd' || c == 'i'
-			|| c == 'u' || c == 'x' || c == 'X'))
-		flags->zero = 0;
+	write(1, &a, 1);
+	return (1);
+}
+
+int	str_print(char *str)
+{
+	int	l;
+
+	if (!str)
+	{
+		write (1, "(null)", 6);
+		return (6);
+	}
+	l = ft_strlen(str);
+	write (1, str, l);
+	return (l);
+}
+
+void	put_hex(unsigned long n, char c)
+{
+	char	*hex;
+
+	hex = "0123456789ABCDEF";
+	if (c == 'l')
+		hex = "0123456789abcdef";
+	if (n >= 16)
+		put_hex(n / 16, c);
+	write(1, &hex[n % 16], 1);
+}
+
+int	hex_print(void *ptr)
+{
+	unsigned long	n;
+
+	if (!ptr)
+		return (write(1, "(nil)", 5));
+	n = (unsigned long)ptr;
+	write(1, "0x", 2);
+	put_hex(n, 'l');
+	return (2 + hex_len(n));
 }
 
 char	*ft_unsigned_itoa(unsigned int n)
