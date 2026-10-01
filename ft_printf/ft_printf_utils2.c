@@ -12,24 +12,50 @@
 
 #include "ft_printf.h"
 
-int	ch_print(char a)
+int	char_print(char a, t_flags flags)//Aposta para warning no se si hay que printear null aqui en caso malo
 {
-	write(1, &a, 1);
-	return (1);
+	int	count;
+
+	count = 1;
+	if (flags.left_align)
+		write(1, &a, 1);
+	while (flags.width > 1)
+	{
+		write(1, " ", 1);
+		flags.width--;
+		count++;
+	}
+	if (!flags.left_align)
+		write(1, &a, 1);
+	return (count);
 }
 
-int	str_print(char *str)
+int	string_print(char *str, t_flags flags)
 {
-	int	l;
+	int	length;
+	int	count;
 
+	count = 0;
 	if (!str)
 	{
 		write (1, "(null)", 6);
 		return (6);
 	}
-	l = ft_strlen(str);
-	write (1, str, l);
-	return (l);
+	if (flags.precision)
+		length = flags.precision;
+	else
+		length = ft_strlen(str);
+	if (flags.left_align)
+		write (1, str, length);
+	while (flags.width > 1)
+	{
+		write(1, " ", 1);
+		flags.width--;
+		count++;
+	}
+	if (!flags.left_align)
+		write (1, str, length);
+	return (length + count);
 }
 
 void	put_hex(unsigned long n, char c)
@@ -82,20 +108,6 @@ int	int_print(int n)
 	int		i;
 
 	str = ft_itoa(n);
-	if (!str)
-		return (0);
-	i = ft_strlen(str);
-	write (1, str, i);
-	free (str);
-	return (i);
-}
-
-int	unsint_print(unsigned int n)
-{
-	char	*str;
-	int		i;
-
-	str = ft_unsigned_itoa(n);
 	if (!str)
 		return (0);
 	i = ft_strlen(str);

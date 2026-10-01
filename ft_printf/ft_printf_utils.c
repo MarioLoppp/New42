@@ -70,3 +70,17 @@ int	unsint_print(unsigned int n)
 	free (str);
 	return (i);
 }
+
+int	unsint_print(unsigned int n)
+{
+	char	*str;
+	int		i;
+
+	str = ft_unsigned_itoa(n);
+	if (!str)
+		return (0);
+	i = ft_strlen(str);
+	write (1, str, i);
+	free (str);
+	return (i);
+}
