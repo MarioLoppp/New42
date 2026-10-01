@@ -1,0 +1,55 @@
+Con este subject, hay que distinguir funciones externas prohibidas, fallos funcionales y requisitos de entrega. No he encontrado llamadas externas prohibidas en los fuentes de printf revisados: tus funciones propias y las de libft están permitidas.
+Pero el estado actual tiene estos incumplimientos o problemas:
+1. La Biblioteca Queda Incompleta
+En el Makefile actual, Makefile:21–29, solo archivas los objetos de printf:
+$(AR) $(NAME) $(OBJS)
+Has quitado la compilación e incorporación de libft, pero tu código sigue llamando a:
+ft_strlen
+ft_itoa
+ft_strchr
+ft_isdigit
+Por ejemplo, int_print() llama a ft_itoa() en ft_printf_utils3.c:73.
+Consecuencia: crear el .a puede funcionar, porque ar no comprueba referencias sin resolver, pero al enlazar un programa únicamente con libftprintf.a faltarán esas funciones.
+Además, el subject exige compilar libft usando su propio Makefile. Actualmente tampoco hay un Makefile dentro de libft/.
+Esto es un bloqueo de entrega, no un caso extremo.
+2. Falta El README Obligatorio
+No hay README.md en la raíz. Esta versión del subject lo exige con:
+- Primera línea en cursiva con el texto indicado y tu login.
+- Description.
+- Instructions.
+- Resources, incluyendo cómo utilizaste IA.
+- Explicación y justificación del algoritmo y la estructura de datos.
+Aunque la función pasara todos los tests, faltaría este requisito.
+3. Estas Funciones No Gestionan Errores De Salida
+Afecta a mandatory y bonus:
+Función	Problema
+ft_printf()	Suma retornos sin detenerse cuando hay un error
+char_print()	Ignora el resultado de write()
+string_print()	Ignora errores y escrituras parciales
+pointer_to_hexadecimal()	Devuelve el tamaño previsto aunque una escritura falle
+put_hex()	Devuelve void, por lo que no comunica errores
+hex_print_content()	No comunica errores de escritura
+int_print_content()	No comunica errores de escritura
+Conversión %% en parse()	Hace write(...) y devuelve 1 aunque falle
+Ejemplo de esa última en parse_bonus.c:116:
+return (write(1, "%", 1), 1);
+El requisito es imitar printf: ante un error de salida, debe devolver un valor negativo. No significa que tus conversiones habituales estén mal, sino que sus rutas de error no cumplen ese comportamiento.
+4. decimal_print() Oculta Fallos De Reserva
+En ft_printf_utils2.c:111–112 y su versión bonus:
+if (!str)
+	return (0);
+Si falla la reserva de ft_itoa() o ft_unsigned_itoa(), se pierde el número y se informa de éxito con cero caracteres. Debe comunicar el fallo y ft_printf() debe propagarlo.
+La liberación normal de la string sí está hecha:
+free(str);
+5. El Makefile No Selecciona Mandatory Tras Bonus
+La marca evita repetir la compilación bonus, pero:
+make bonus → make
+puede conservar la biblioteca bonus. No es un defecto de una conversión, pero sí una limitación de la separación de evaluaciones. Desde limpio selecciona cada versión; sin limpiar, no siempre.
+Lo Que No Debes Confundir Con Incumplimientos
+- Formatos inválidos o incompletos: el subject exceptúa comportamiento indefinido. No tienes obligación de imitar todas las rarezas de libc con ellos. Las comprobaciones de '\0' del parser bonus ya están corregidas.
+- Precisión en %c, flags en %% y otras combinaciones no definidas por C: no debes inventar una regla universal basándote en un tester. El comportamiento depende de la implementación.
+- Errores de ft_calloc, ft_strncmp, ft_strlcat y ft_atoi: son defectos reales de tu libft, pero no están en el flujo actual de printf. No los presentaría como fallos de tus conversiones.
+- Overflow con anchuras enormes: es una mejora de robustez, no lo pondría por delante de los bloqueos de entrega anteriores.
+Prioridad Para Entregar
+Primero arreglaría la compilación y el enlazado de libft, después añadiría el README, y luego revisaría la propagación de errores de write y malloc.
+No he modificado archivos ni ejecutado una nueva batería de tests. Tampoco doy por validada la Norm actual sin volver a pasar Norminette.

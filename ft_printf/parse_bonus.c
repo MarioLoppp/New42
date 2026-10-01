@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "ft_printf.h"
+#include "ft_printf_bonus.h"
 
 void	check_width_precision(const char *letter, t_flags *flags, int *count)
 {
@@ -71,19 +71,19 @@ void	check_flags(const char *letter, t_flags *flags, int *i)
 {
 	char	*basic_flags;
 	char	*end_flags;
-	int		count;
+	int		c;
 
 	basic_flags = "-0# +";
 	end_flags = "cspdiuxX%";
-	count = 0;
-	while (ft_strchr(basic_flags, letter[*i + count]))
+	c = 0;
+	while (letter[*i + c] && ft_strchr(basic_flags, letter[*i + c]))
 	{
-		fill_flags(letter[*i + count], flags);
-		count++;
+		fill_flags(letter[*i + c], flags);
+		c++;
 	}
-	check_width_precision(&letter[*i + count], flags, &count);
-	if (ft_strchr(end_flags, letter[*i + count]))
-		*i += count;
+	check_width_precision(&letter[*i + c], flags, &c);
+	if (letter[*i + c] && ft_strchr(end_flags, letter[*i + c]))
+		*i += c;
 	else
 		flags->ignore = 1;
 }
@@ -91,8 +91,14 @@ void	check_flags(const char *letter, t_flags *flags, int *i)
 int	parse(const char *letter, va_list argument_list, int *i)
 {
 	t_flags	flags;
+	int		start;
 
+	start = *i;
 	init_flags(&flags);
+	check_flags(letter, &flags, i);
+	if (flags.ignore)
+		return (*i = start - 1, 0);
+	apply_priorities(&flags, letter[*i]);
 	if (letter[*i] == 'c')
 		return (char_print(va_arg(argument_list, int), flags));
 	else if (letter[*i] == 's')
